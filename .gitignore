@@ -1,1 +1,7 @@
 env.py
+env_tradestation.py
+play.ipynb
+coinbase.ipynb
+explore_crypto.ipynb
+*.csv
+data_retriever_simple.py
