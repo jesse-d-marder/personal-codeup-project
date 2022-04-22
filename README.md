@@ -1,0 +1,1 @@
+### This repository contains the code for the personal project completed as part of the Codeup Data Science curriculum
