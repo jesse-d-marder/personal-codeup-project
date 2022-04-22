@@ -41,13 +41,13 @@ def add_features(df):
     
     ###### TARGETS ######
     # forward 1 day log returns
-    df["log_ret_fwd"] = np.log(df.close) - np.log(df.close.shift(-1))
+    df["fwd_log_ret"] = np.log(df.close) - np.log(df.close.shift(-1))
     # forward standard returns
-    df["ret_fwd"] = df.close.shift(-1) - df.close
+    df["fwd_ret"] = df.close.shift(-1) - df.close
     # forward pct change
     df["fwd_pct_chg"] = df.close.pct_change(-1)
     # binary positive vs negative next day return
-    df["next_close_positive"] = df.ret_fwd>0
+    df["fwd_close_positive"] = df.fwd_ret>0
     
     ###### FEATURES ######
     # Pct change from yesterday
