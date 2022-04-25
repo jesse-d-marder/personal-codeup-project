@@ -41,7 +41,7 @@ def add_features(df):
     
     ###### TARGETS ######
     # forward 1 day log returns
-    df["fwd_log_ret"] = np.log(df.close) - np.log(df.close.shift(-1))
+    df["fwd_log_ret"] = np.log(df.close.shift(-1)) - np.log(df.close)
     # forward standard returns
     df["fwd_ret"] = df.close.shift(-1) - df.close
     # forward pct change
