@@ -8,7 +8,7 @@ import os
 auth_client = cbpro.AuthenticatedClient(api_key, secret_key, passphrase)
 
 def acquire_crypto_data(products_to_acquire, first_start_time, final_end_time, minute_bars):
-    """ Acquires cryptocurrency price data using the Coinbase API. Right now just works for acquiring minute data"""
+    """ Acquires cryptocurrency price data using the Coinbase API"""
     
     # Checks if inputted granularity matches values allowed by API
     if minute_bars not in [60, 300, 900, 3600, 21600, 86400]:
