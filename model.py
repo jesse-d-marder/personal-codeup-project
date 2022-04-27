@@ -4,7 +4,7 @@ import numpy as np
 
 from statsmodels.tsa.arima.model import ARIMA
 
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, accuracy_score
 from sklearn.linear_model import LinearRegression, LassoLars, TweedieRegressor
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
@@ -120,7 +120,8 @@ def get_top_features(X_train_scaled, y_train, model, target, n_features):
 def predict_regression(models, X_train_scaled, X_validate_scaled, X_test_scaled, y_train, y_validate, perform_feature_selection):
     """Fits and predicts using inputted list of models. Outputs RMSE results, y_train, and y_validate with individual model results"""
     
-    rmses_validate={}
+    rmses_train = {}
+    rmses_validate = {}
     
     # iterate through each model
     for model in models:
@@ -167,10 +168,11 @@ def predict_regression(models, X_train_scaled, X_validate_scaled, X_test_scaled,
               # "\nValidation/Out-of-Sample: ", rmse_validate)
 
         rmses_validate[model_name] = rmse_validate
+        rmses_train[model_name] = rmse_train
         
-    return rmses_validate, y_train, y_validate
+    return rmses_train, rmses_validate, y_train, y_validate
 
-def calculate_regression_results(models, rmses_validate, validate, y_validate):
+def calculate_regression_results(models, rmses_train, rmses_validate, validate, y_validate):
     """Generates average trade and RMSE dataframe from results of regression modeling"""
     
     # Get names of each model
@@ -180,6 +182,7 @@ def calculate_regression_results(models, rmses_validate, validate, y_validate):
     y_validate["next_day_close"] = validate.close.shift(-1)
 
     model_rmse_validate = []
+    model_rmse_train = []
     model_average_trade_returns = []
 
     # Iterate through each model
@@ -191,16 +194,19 @@ def calculate_regression_results(models, rmses_validate, validate, y_validate):
         print(mod,round(y_validate[mod+"_ret"].mean(),2))
         model_average_trade_returns.append(y_validate[mod+"_ret"].mean())
         model_rmse_validate.append(rmses_validate[mod])
+        model_rmse_train.append(rmses_train[mod])
         
     # Add forward return column to y_validate for baseline comparison
     y_validate['daily_return'] = validate.fwd_ret
 
     # Create dataframe of avg trade and rmse values
-    avg_trade_model = pd.DataFrame(data = {'avg_trade':model_average_trade_returns,'rmse':model_rmse_validate}, index = model_names)
+    avg_trade_model = pd.DataFrame(data = {'avg_trade':model_average_trade_returns,
+                                           'validate_rmse':model_rmse_validate,
+                                          'train_rmse':model_rmse_train}, index = model_names)
 
     # Concatenate to the avg_trade_model df the avg trade we'd get if just bought every day and sold next (close to close)
-    # This is a form of baseline
-    avg_trade_model= pd.concat([avg_trade_model,pd.DataFrame({'avg_trade':y_validate.daily_return.mean(),'rmse':np.nan}, index = ['buy_everyday'])])
+    # This is a baseline. RMSE not defined for this case.
+    avg_trade_model= pd.concat([avg_trade_model,pd.DataFrame({'avg_trade':y_validate.daily_return.mean(),'validate_rmse':np.nan,'train_rmse':np.nan}, index = ['buy_everyday'])])
 
     return avg_trade_model.sort_values(by='avg_trade',ascending=False)
 
@@ -252,3 +258,95 @@ def get_rolling_predictions(X_train_scaled_featured, X_validate_scaled_featured,
     
     return train_rolling_predictions, train_rolling_actuals, validate_rolling_predictions, validate_rolling_actuals
 
+def predict_classification(models, X_train_scaled, X_validate_scaled, X_test_scaled, y_train, y_validate, perform_feature_selection):
+    """Fits and predicts using inputted list of classification models. Outputs Classification results, y_train, and y_validate with individual model results"""
+    
+    accuracies_train = {}
+    accuracies_validate = {}
+    
+    # iterate through each model
+    for model in models:
+
+        classification_model = model
+        
+        # Gets a string name for the model
+        model_name = model.__repr__().split('()')[0]
+
+        print(model_name)
+        
+        # Whether to use recursive feature elimination
+        if perform_feature_selection:
+
+            top_features = get_top_features(X_train_scaled, y_train, model,target, 16)
+
+            X_train_scaled_featured = X_train_scaled[top_features]
+            X_validate_scaled_featured  = X_validate_scaled[top_features]
+            X_test_scaled_featured = X_test_scaled[top_features]
+            
+        else:
+            
+            X_train_scaled_featured = X_train_scaled.copy()
+            X_validate_scaled_featured = X_validate_scaled.copy()
+            X_test_scaled_featured = X_test_scaled.copy()
+        
+        # Fit model to the training data
+        classification_model.fit(X_train_scaled_featured, y_train.fwd_close_positive)
+        
+        # Predict on train and add results to y_train
+        y_train[model_name] = classification_model.predict(X_train_scaled_featured)
+        
+        # Get Accuracy metric for train
+        accuracy_train = accuracy_score(y_train.fwd_close_positive, y_train[model_name])
+        
+        # Predict on validate
+        y_validate[model_name] = classification_model.predict(X_validate_scaled_featured)
+
+        # Get RMSE metric for validate
+        accuracy_validate = accuracy_score(y_validate.fwd_close_positive, y_validate[model_name])
+
+        accuracies_validate[model_name] = accuracy_validate
+        accuracies_train[model_name] = accuracy_train
+        
+    return accuracies_train, accuracies_validate, y_train, y_validate
+
+def calculate_classification_results(models, accuracies_train, accuracies_validate, validate, y_validate):
+    """Generates average trade and Accuracy dataframe from results of classifiction modeling"""
+    
+    # Get names of each model
+    model_names = [m.__repr__().split('()')[0] for m in models]
+    # Add close prices to y_validate to enable calculated trade return
+    y_validate["close"] = validate.close
+    y_validate["next_day_close"] = validate.close.shift(-1)
+
+    model_accuracy_validate = []
+    model_accuracy_train = []
+    model_average_trade_returns = []
+
+    # Iterate through each model
+    for mod in model_names:
+        # Create a column saying whether we would go long or not (short)
+        y_validate[mod+"_long"] = y_validate[mod]>0
+        # Calculate the return that day (assumes always goes long or short every day)
+        y_validate[mod+"_ret"] = np.where(y_validate[mod+"_long"], 
+                                          y_validate.next_day_close-y_validate.close, 
+                                          y_validate.close-y_validate.next_day_close)
+        print(mod,round(y_validate[mod+"_ret"].mean(),2))
+        model_average_trade_returns.append(y_validate[mod+"_ret"].mean())
+        model_accuracy_validate.append(accuracies_validate[mod])
+        model_accuracy_train.append(accuracies_train[mod])
+        
+    # Add forward return column to y_validate for baseline comparison
+    y_validate['daily_return'] = validate.fwd_ret
+
+    # Create dataframe of avg trade and rmse values
+    avg_trade_model = pd.DataFrame(data = {'avg_trade':model_average_trade_returns,
+                                           'validate_accuracy':model_accuracy_validate,
+                                          'train_accuracy':model_accuracy_train}, index = model_names)
+
+    # Concatenate to the avg_trade_model df the avg trade we'd get if just bought every day and sold next (close to close)
+    # This is a baseline. RMSE not defined for this case.
+    avg_trade_model= pd.concat([avg_trade_model,pd.DataFrame({'avg_trade':y_validate.daily_return.mean(),
+                                                              'validate_accuracy':np.nan,
+                                                              'train_accuracy':np.nan}, index = ['buy_everyday'])])
+
+    return avg_trade_model.sort_values(by='avg_trade',ascending=False)
