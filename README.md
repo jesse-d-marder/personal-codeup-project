@@ -14,6 +14,7 @@
 ### 4. Exploration & modeling notebooks (explore.ipynb, model.ipynb)
 ### 5. Functions to support exploration and modeling work (model.py)
 
+---------------------------------------------------------------------
 ### Project Description and Goals
 
 The goal of this project was to compare the forecasting ability of machine learning and ARIMA models in predicting crytocurrency returns. The profitability of trading strategies built from the results was also evaluated. Cryptocurrency is a relatively new market that has seen explosive growth in the past 5 years. Owing to their tremendous volatility Bitcoin and other cryptocurrencies have gained a reputation for being more speculative assets. The ability to predict cryptocurrency prices is useful for developing profitable trading strategies and understanding the risk they add to a portfolio.
