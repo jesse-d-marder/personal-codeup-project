@@ -45,7 +45,7 @@ def add_features(df):
     # forward standard returns
     df["fwd_ret"] = df.close.shift(-1) - df.close
     # forward pct change
-    df["fwd_pct_chg"] = df.close.pct_change(-1)
+    df["fwd_pct_chg"] = df.close.pct_change(1).shift(-1)
     # binary positive vs negative next day return
     df["fwd_close_positive"] = df.fwd_ret>0
     

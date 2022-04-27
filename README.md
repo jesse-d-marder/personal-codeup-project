@@ -9,14 +9,14 @@
 - Instructions for reproducing this project and findings
 - Key findings and recommendations for this project
 - Conclusion
-### 2. Final report (improve_zillow.ipynb)
+### 2. Final report (predict_crypto.ipynb)
 ### 3. Acquire and Prepare modules (acquire.py, prepare.py)
 ### 4. Exploration & modeling notebooks (explore.ipynb, model.ipynb)
 ### 5. Functions to support exploration and modeling work (model.py)
 
 ### Project Description and Goals
 
-The goal of this project was to compare the forecasting ability of machine learning and ARIMA models in predicting crytocurrency returns. The profitability of trading strategies built from the results was also evaluated. Cryptocurrency is a relatively new market that has seen explosive growth in the past 5 years. Owing to their tremendous volatility Bitcoin and other cryptocurrencies have gained a reputation for being more speculative assets. The ability to predict cryptocurrency prices is useful for developing profitable trading strategies.
+The goal of this project was to compare the forecasting ability of machine learning and ARIMA models in predicting crytocurrency returns. The profitability of trading strategies built from the results was also evaluated. Cryptocurrency is a relatively new market that has seen explosive growth in the past 5 years. Owing to their tremendous volatility Bitcoin and other cryptocurrencies have gained a reputation for being more speculative assets. The ability to predict cryptocurrency prices is useful for developing profitable trading strategies and understanding the risk they add to a portfolio.
 
 ### Initial Questions and Hypotheses
 
@@ -27,35 +27,34 @@ The goal of this project was to compare the forecasting ability of machine learn
 
 | Variable    | Meaning     |
 | ----------- | ----------- |
-| bedroom    |  number of bedrooms in home         |
-| bathroom           |  number of bathrooms in home          |
-| bathroom_bin    |  number of bathrooms split into 3 categories     |
-| bedroom_bin   |  number of bedrooms split into 3 categories     |
-| age    |  age of the home   |
+| btc   |  Bitcoin       |
+| sigma |  Parkinson range volatility estimator (lag values 1- 7)     |
+| RR    |  Relative price range (first lag)   |
+| fwd_log_ret   |  the log return for one day in the future (regression target)   |
+| fwd_close_positive    |  whether the next day close is higher than today's close (classification target)  |
 
 
 ### Project Plan
 
 For this project I followed the data science pipeline:
 
-Planning: I established the goals for this project and the relevant questions I wanted to answer. I used the results from my exploration to guide completion of this project. I followed similar steps as previous projects and used the Trello board from the Zillow regression project as a guide.
+Planning: I wanted to roughly follow the methodology used by Helder Sebastiao and Pedro Godinho in their article "Forecasting and trading cryptocurrencies with machine learning under changing market conditions," published 06 Jan 2021 (https://rdcu.be/cMaLB). The authors examined the predictability of three major crytocurrencies - bitcoin, ethereum, and litecoin - using machine learning techniques for the period April 15, 2015 - March 03, 2019. Due to time constraints I focused solely on bitcoin and limited the number of models tested. By no means is this project a faithful replication of their work but does provide insight into potential uses of machine learning to predict cryptocurrency returns and profitability of trading strategies built from model results. This work also covers a wider range in data and compares the machine learning models to an ARIMA model.
 
-Acquire: The data for this project is from a SQL Database called 'zillow' located on a cloud server. The wrangle.py script is used to query the database for the required data tables and returns the data in a Pandas DataFrame. This script also saves the DataFrame to a .csv file for faster subsequent loads. The script will check if the zillow_2017.csv file exists in the current directory and if so will load it into memory, skipping the SQL query.
+Acquire: The data for this project consists of daily open, high, low, and close prices as well as volume data for bitcoin from 2016-08-24 - 2022-04-21 and was acquired using the Coinbase Pro API. An account and API key are required for access. Scripts to acquire this data are included in acquire.py.
 
-Prepare: The wrangle.py script uses the same wrangle_zillow function from the acquire step to prepare the data for exploration and modeling. Steps here include removing or filling in  null values (NaN), generating additional features, and encoding categorical variables. This script also contains a split_data function to split the dataset into train, validate, and test sets cleanly. Additional functions to remove outliers and scale the data are included in this file. The model.py file includes a function add_features to create additional features used in exploration and modeling.
+Prepare: The prepare.py module cleans the data and also contains a function to add features and targets (regression and classification) to the dataframes. 
 
-Explore: The questions established in planning were analyzed using statistical tests including correlation and t-tests to confirm hypotheses about the data. This work was completed in the explore_zillow.ipynb file and relevant portions were moved to the improve_zillow.ipynb final deliverable. A visualization illustrating the results of the tests and answering each question is included. 
+Explore: The questions established in planning were analyzed using statistical tests including correlation and t-tests to confirm hypotheses about the data. Relationships between predictors and the target were explored. 
 
-Model: Four different regression algorithms were investigated to determine if log errors could be predicted using features identified during exploration. A select set of hyperparameters were tested against train and validate data to determine which demonstrated the best performance. The final model was selected based on RMSE score on validate (after checking for overfitting) and used to make predictions on the withheld test data.
+Model: Four different regression algorithms were investigated to determine if log returns could be predicted
 
-Delivery: This is in the form of this github repository as well as a presentation of my final notebook to the stakeholders.
+Delivery: This is in the form of this github repository. Happy to talk through my results with anyone interested.
 
 ### Steps to Reproduce
-
-1. You will need an env.py file that contains the hostname, username and password of the mySQL database that contains the zillow database. Store that env file locally in the repository. 
-2. Clone my repository (including the wrangle_zillow.py and model.py modules). Confirm .gitignore is hiding your env.py file.
+1. You will need an env.py file that contains the passphrase, secret_key and api_key of your Coinbase PRO account. Store that env file locally in the repository. 
+2. Clone my repository. Confirm .gitignore is hiding your env.py file.
 3. Libraries used are pandas, matplotlib, scipy, sklearn, seaborn, and numpy.
-4. You should be able to run improve_zillow.ipynb.
+4. You should be able to run predict_crypto.ipynb.
 
 ### Key Findings 
 
