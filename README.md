@@ -18,10 +18,13 @@
 
 The goal of this project was to compare the forecasting ability of machine learning and ARIMA models in predicting crytocurrency returns. The profitability of trading strategies built from the results was also evaluated. Cryptocurrency is a relatively new market that has seen explosive growth in the past 5 years. Owing to their tremendous volatility Bitcoin and other cryptocurrencies have gained a reputation for being more speculative assets. The ability to predict cryptocurrency prices is useful for developing profitable trading strategies and understanding the risk they add to a portfolio.
 
-### Initial Questions and Hypotheses
+### Initial Questions
 
 1. Are past returns predictive of future returns for cryptocurrencies?
 2. Is there a relationship between volatility and returns?
+3. Are there differences in log returns based on the day of the week?
+4. Are there differences in log returns based on the month of the year?
+5. Are there seasonal tendencies to log returns?
 
 ### Data Dictionary
 
