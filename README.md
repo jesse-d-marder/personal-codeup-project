@@ -57,22 +57,23 @@ Delivery: This is in the form of this github repository. I am happy to talk thro
 4. You should be able to run predict_crypto.ipynb.
 
 ### Key Findings 
-- Average log returns vary widely depending on the day of the week and month of the year
-- Returns do not appear to follow any seasonal tendencies
-- No features exhibit strong correlation with the regression target
-- Lag and autocorrelation plots of log returns do not show that future returns are correlation with past returns
-- Lag and autocorrelation plots of close price show a correlation with lags <50
 - The Decision Tree Regressor with default hyperparameters and standard train/validate/test split performed best on an average trade basis, but based on what appears to be severe overfitting (0 RMSE on train) will not be used on test. Linear Regression shows the best performance based on average trade and did not exhibit overfitting. This model will be tested on the withheld test data set. 
 - Most models did worse than the baselines.
 - Single Step forecasting did worse than nearly every model forecasting using the standard train/validate/test split method.
 - Higher accuracy and lower RMSE scores did not always result in a better performing model on an average trade basis.
 - The ARMA model did not show superior performance relative to the machine learning models. 
+- Average log returns vary widely depending on the day of the week and month of the year
+- Returns do not appear to follow any seasonal tendencies
+- No features exhibit strong correlation with the regression target
+- Future returns of Bitcoin do not show correlation with past returns
+- Lag and autocorrelation plots of close price show a correlation with lags <50
 
 ### Conclusion and Recommendations
 - Forecasting accuracy is highly variable across the different models tested for predicting Bitcoin returns. All models except two exhibited positive average trade performance and regression models outperformed classification models. The ARMA (2,1) model was inferior to the regression models but generally superior to the classification models.
-- The top model based on the highest average trade value and without overfitting from train to validate was Linear Regression with default hyperparameters. When used on the test set average trade dropped from 84 to 38, over 50% decrease but, encouragingly still positive. 
+- The top model based on the highest average trade value and without overfitting from train to validate was Linear Regression with default hyperparameters. When used on the test set average trade dropped from 84 to 38 - an over 50% drop but, encouragingly, still positive. 
 - Performing single step forecasts resulted in inferior performance vs multi-step (using a 50/30/20% train/validate/test split). For the top model average trade decreased by $40. 
 - Returns do not appear to follow any seasonal tendencies
+- These models should be refined prior to use in a trading strategy. Importantly, the risk behind each model should be quantified so a trader has a full picture of what to expect in live trading.
 
 ### Future work
 - Explore other features and feature combinations that may be predictive of returns. The original paper also included blockchain information (such as on-chain volume, active addresses, and block sizes) as inputs, though for most of the most successful models only returns, volatility, and daily dummies were actually used. 
