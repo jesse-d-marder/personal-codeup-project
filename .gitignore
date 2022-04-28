@@ -3,5 +3,7 @@ env_tradestation.py
 play.ipynb
 coinbase.ipynb
 explore_crypto.ipynb
-*.csv
+ETH*
+LTC*
+arima*
 data_retriever_simple.py
